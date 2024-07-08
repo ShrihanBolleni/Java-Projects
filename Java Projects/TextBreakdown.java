@@ -1,0 +1,124 @@
+/**
+ * This program analyzes a text file, either read from a URL or a local file, to provide various statistics and insights about the text.
+ */
+
+import java.util.*;
+import java.net.*;
+import java.io.*;
+public class TextBreakdown
+{
+	public static void main(String[] args)
+	{
+	    Scanner input=new Scanner(System.in);
+		ArrayList<String> linesOfText=new ArrayList<String>();
+		linesOfText=readText(linesOfText);
+		linesOfText=formatText(linesOfText);
+        ArrayList<String> words=new ArrayList<String>();
+        // Splitting lines into words and converting to lowercase
+        for(int i=0;i<linesOfText.size();i++)
+        {
+            String[] a=linesOfText.get(i).split(" ");
+            for(int j=0;j<a.length;j++)
+            words.add(a[j]);
+        }
+        for(int i=0;i<words.size();i++)
+            words.set(i,words.get(i).toLowerCase());
+        // Calculating average word length
+        double avg=0;
+        for(int i=0;i<words.size();i++)
+            avg+=words.get(i).length();
+        avg/=words.size();
+        // Finding unique words
+        boolean uw=true;
+        int u=0;
+        ArrayList<String> iv=new ArrayList<String>();
+        for(int i=0;i<words.size();i++)
+        {
+            uw=true;
+            for(int j=i-1;j>=0;j--)
+            {
+                if(words.get(i).equals(words.get(j)))
+                uw=false;
+            }
+            if(uw)
+            {
+                u++;
+                iv.add(words.get(i));
+            }
+        }
+        // Counting occurrences of unique words
+        ArrayList<Integer> top=new ArrayList<Integer>();
+        for(int i=0;i<iv.size();i++)
+        {
+            int ocur=0;
+            for(int j=0;j<words.size();j++)
+            {
+                if(iv.get(i).equals(words.get(j)))
+                ocur++;
+            }
+            top.add(ocur);
+        }
+        // Displaying statistics
+        System.out.println("This text :");
+        System.out.println("Contains "+words.size()+" words and "+u+" unique words");
+        System.out.print("Each word has an average length of ");
+        System.out.printf("%.2f",avg);
+        System.out.println(" letters");
+        System.out.println("The top fifteen most common words are :");
+        int ind=0;
+        int x=0;
+        while(x<15)
+        {
+            ind=0;
+            for(int i=1;i<top.size();i++)
+            {
+                if(top.get(ind)<top.get(i))
+                ind=i;
+            }
+            System.out.println(iv.remove(ind)+" : "+top.remove(ind));
+            x++;
+        }
+        System.out.println("");
+        System.out.println("What word would you like to find?");
+        String sw=input.nextLine();
+        int so=0;
+        for(int i=0;i<words.size();i++)
+        {
+            if(sw.equals(words.get(i)))
+            so++;
+        }
+        System.out.println("\nThe word \""+sw+"\" was found "+so+" times.");
+	}
+	
+    /**
+     * Reads a .txt file from the internet or a local file and stores each line as a String in an ArrayList.
+     * If there is a problem reading the file from the internet, it attempts to read from a local file.
+     * @param text An ArrayList to store the lines of text from the file
+     * @return The ArrayList containing the lines of text from the file
+     */
+	public static ArrayList<String> readText(ArrayList<String> text)
+	{
+		String website = "http://archive.org/stream/TheEpicofGilgamesh_201606/eog_djvu.txt";
+		//String website = "";
+		try{URL url = new URL(website);Scanner s = new Scanner(url.openStream());while(s.hasNext())text.add(s.nextLine());}
+		catch(Exception e){try{Scanner s = new Scanner(new File("PrideAndPrejudice.txt"));while(s.hasNext())text.add(s.nextLine());}catch(Exception ex){}}
+		return text;
+	}
+	/**
+     * Removes the extra HTML formatting associated with the file and retains only letters and spaces from the text.
+     * @param text The ArrayList containing the lines of text to be formatted
+     * @return The formatted ArrayList containing only letters and spaces
+     */
+	public static ArrayList<String> formatText(ArrayList<String> text)
+	{	for(int line =0;line<text.size();line++)
+		{	String s = text.get(line);
+			if(s.contains("The Epic Of Gilgamesh")&&!s.contains("<"))
+			{	for(int a=line-1;a>=0;a--)text.remove(a);break;}}
+		for(int line =0;line<text.size();line++)
+		{	String s = text.get(line);
+			text.set(line,text.get(line).replaceAll("[^a-zA-Z ]",""));
+			if(s.contains("</pre>"))for(int a=line-5;a<text.size();text.remove(a));}
+		return text;
+	}
+
+}
